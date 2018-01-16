@@ -1,0 +1,3 @@
+[submodule "tutorials/files/ansible-vertica"]
+	path = tutorials/files/ansible-vertica
+	url = ../ansible-vertica.git
