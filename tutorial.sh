@@ -27,8 +27,16 @@ EXTRA_PORTS=( "8080" "30000" "443" )
 # +-----------+----------------+-------------------+
 
 DOCKER_IMAGETAG=${DOCKER_IMAGETAG:-1.0}
-DOCKER_HOST_IMAGE="turkenh/ubuntu-1604-ansible-docker-host:${DOCKER_IMAGETAG}"
+# DOCKER_HOST_IMAGE="turkenh/ubuntu-1604-ansible-docker-host:${DOCKER_IMAGETAG}"
+# TUTORIAL_IMAGE="turkenh/ansible-tutorial:${DOCKER_IMAGETAG}"
+
+DOCKER_HOST_IMAGE="turkenh/ubuntu-1404-ansible-docker-host:${DOCKER_IMAGETAG}"
 TUTORIAL_IMAGE="turkenh/ansible-tutorial:${DOCKER_IMAGETAG}"
+
+# DOCKER_HOST_IMAGE="dp/ubuntu14.04:${DOCKER_IMAGETAG}"
+# TUTORIAL_IMAGE="turkenh/ansible-tutorial:${DOCKER_IMAGETAG}"
+
+
 
 function help() {
     echo -ne "-h, --help              prints this help message
@@ -58,7 +66,7 @@ function runHostContainer() {
     local port1=$(($HOSTPORT_BASE + $3))
     local port2=$(($HOSTPORT_BASE + $3 + $NOF_HOSTS))
     echo "starting container ${name}: mapping hostport $port1 -> container port 80 && hostport $port2 -> container port ${EXTRA_PORTS[$3]}"
-    docker run -d -p $port1:80 -p $port2:${EXTRA_PORTS[$3]} --net ${NETWORK_NAME} --name="${name}" "${image}" >/dev/null
+    docker run -t -d -p $port1:80 -p $port2:${EXTRA_PORTS[$3]} --net ${NETWORK_NAME} --name="${name}" "${image}" >/dev/null
     if [ $? -ne 0 ]; then
         echo "Could not start host container. Exiting!"
         exit 1

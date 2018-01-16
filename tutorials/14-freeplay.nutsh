@@ -1,5 +1,7 @@
 lesson_name("Free play")
 make_and_go_ws
+clear_ws
+run(`cp -r /tutorials/files/ansible-vertica/* .`)
 
 "This is not a lesson, rather an option to let you play with ansible!"
 
