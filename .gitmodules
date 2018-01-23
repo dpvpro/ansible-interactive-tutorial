@@ -1,0 +1,3 @@
+[submodule "ansible-vertica"]
+	path = workspace
+	url = ../ansible-vertica.git
