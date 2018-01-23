@@ -30,8 +30,8 @@ DOCKER_IMAGETAG=${DOCKER_IMAGETAG:-1.0}
 # DOCKER_HOST_IMAGE="turkenh/ubuntu-1604-ansible-docker-host:${DOCKER_IMAGETAG}"
 # TUTORIAL_IMAGE="turkenh/ansible-tutorial:${DOCKER_IMAGETAG}"
 
-DOCKER_HOST_IMAGE="turkenh/ubuntu-1404-ansible-docker-host:${DOCKER_IMAGETAG}"
-TUTORIAL_IMAGE="turkenh/ansible-tutorial:${DOCKER_IMAGETAG}"
+DOCKER_HOST_IMAGE="turkenh/ubuntu-1604-ansible-docker-host:${DOCKER_IMAGETAG}"
+TUTORIAL_IMAGE="ubuntu-wks:${DOCKER_IMAGETAG}"
 
 # DOCKER_HOST_IMAGE="dp/ubuntu14.04:${DOCKER_IMAGETAG}"
 # TUTORIAL_IMAGE="turkenh/ansible-tutorial:${DOCKER_IMAGETAG}"
@@ -67,10 +67,14 @@ function runHostContainer() {
     local port2=$(($HOSTPORT_BASE + $3 + $NOF_HOSTS))
     echo "starting container ${name}: mapping hostport $port1 -> container port 80 && hostport $port2 -> container port ${EXTRA_PORTS[$3]}"
     docker run -t -d -p $port1:80 -p $port2:${EXTRA_PORTS[$3]} --net ${NETWORK_NAME} --name="${name}" "${image}" >/dev/null
+    # docker run -t -d -p $port1:80 -p $port2:${EXTRA_PORTS[$3]} --name="${name}" "${image}" >/dev/null
     if [ $? -ne 0 ]; then
         echo "Could not start host container. Exiting!"
         exit 1
     fi
+    # inject own key
+    docker exec -i ${name} sh -c 'echo -e "\n" >> /root/.ssh/authorized_keys'
+    cat ~/.ssh/id_rsa.pub | docker exec -i ${name} sh -c 'cat >> /root/.ssh/authorized_keys'
 }
 
 function runTutorialContainer() {
@@ -82,9 +86,12 @@ function runTutorialContainer() {
     fi
     killContainerIfExists ansible.tutorial > /dev/null
     echo "starting container ansible.tutorial"
+    # docker run -it -v "${WORKSPACE}":/root/workspace -v "${TUTORIALS_FOLDER}":/tutorials --net ${NETWORK_NAME} \
+    #   --env HOSTPORT_BASE=$HOSTPORT_BASE \
+    #   ${entrypoint} --name="ansible.tutorial" "${TUTORIAL_IMAGE}" ${args}
     docker run -it -v "${WORKSPACE}":/root/workspace -v "${TUTORIALS_FOLDER}":/tutorials --net ${NETWORK_NAME} \
       --env HOSTPORT_BASE=$HOSTPORT_BASE \
-      ${entrypoint} --name="ansible.tutorial" "${TUTORIAL_IMAGE}" ${args}
+      --name="ansible.tutorial" "${TUTORIAL_IMAGE}"
     return $?
 }
 
