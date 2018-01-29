@@ -5,7 +5,7 @@ RUN apt-get update
 RUN apt-get install -y software-properties-common
 RUN apt-add-repository -y ppa:ansible/ansible
 RUN apt-get update 
-RUN apt-get install -y ansible openssh-server openssh-client fping curl nmap bmon htop iotop git build-essential bash-completion bash dnsutils iputils-ping iproute2 mc
+RUN apt-get install -y ansible openssh-server openssh-client fping curl nmap bmon htop iotop git build-essential bash-completion bash dnsutils iputils-ping iproute2 mc man-db
 
 
 WORKDIR /root
