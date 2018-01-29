@@ -112,8 +112,12 @@ function setupFiles() {
         #ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' host$i.example.org)
         ip=$(docker network inspect --format="{{range \$id, \$container := .Containers}}{{if eq \$container.Name \"host$i.example.org\"}}{{\$container.IPv4Address}} {{end}}{{end}}" ${NETWORK_NAME} | cut -d/ -f1)
         # ip=$(docker network inspect --format="{{range \$id, \$container := .Containers}}{{if eq \$container.Name \"host$i.example.org\"}}{{\$container.IPv4Address}} {{end}}{{end}}" a600ca829442 | cut -d/ -f1)
-        echo "host$i.example.org ansible_host=$ip ansible_user=root" >> "${step_01_hosts_file}"
+        echo "host$i.example.org ansible_host=$ip ansible_user=root" >> "${step_01_hosts_file}" 
     done
+
+    echo "[web]" > "${BASEDIR}/ansible-vertica/docker_hosts"
+    # cat "${step_01_hosts_file}" >> "${BASEDIR}/ansible-vertica/docker_hosts"
+    cat "${step_01_hosts_file}" | tee -a "${BASEDIR}/ansible-vertica/docker_hosts"
 }
 function init () {
     mkdir -p "${WORKSPACE}"
