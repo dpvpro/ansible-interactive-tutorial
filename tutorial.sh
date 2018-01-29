@@ -1,9 +1,10 @@
 #!/bin/bash
 BASEDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-NOF_HOSTS=3
+NOF_HOSTS=4
 NETWORK_NAME="ansible.tutorial"
-WORKSPACE="${BASEDIR}/workspace"
+# WORKSPACE="${BASEDIR}/workspace"
+WORKSPACE="${BASEDIR}/ansible-vertica"
 TUTORIALS_FOLDER="${BASEDIR}/tutorials"
 
 HOSTPORT_BASE=${HOSTPORT_BASE:-42726}
@@ -65,16 +66,17 @@ function runHostContainer() {
     local image=$2
     local port1=$(($HOSTPORT_BASE + $3))
     local port2=$(($HOSTPORT_BASE + $3 + $NOF_HOSTS))
-    echo "starting container ${name}: mapping hostport $port1 -> container port 80 && hostport $port2 -> container port ${EXTRA_PORTS[$3]}"
-    docker run -t -d -p $port1:80 -p $port2:${EXTRA_PORTS[$3]} --net ${NETWORK_NAME} --name="${name}" "${image}" >/dev/null
-    # docker run -t -d -p $port1:80 -p $port2:${EXTRA_PORTS[$3]} --name="${name}" "${image}" >/dev/null
+    # echo "starting container ${name}: mapping hostport $port1 -> container port 80 && hostport $port2 -> container port ${EXTRA_PORTS[$3]}"
+    # docker run -t -d -p $port1:80 -p $port2:${EXTRA_PORTS[$3]} --net ${NETWORK_NAME} --name="${name}" "${image}" >/dev/null
+    echo "starting container ${name}"
+    docker run -t -d --net ${NETWORK_NAME} --name="${name}" "${image}" >/dev/null
     if [ $? -ne 0 ]; then
         echo "Could not start host container. Exiting!"
         exit 1
     fi
     # inject own key
-    docker exec -i ${name} sh -c 'echo -e "\n" >> /root/.ssh/authorized_keys'
-    cat ~/.ssh/id_rsa.pub | docker exec -i ${name} sh -c 'cat >> /root/.ssh/authorized_keys'
+    # docker exec -i ${name} sh -c 'echo -e "\n" >> /root/.ssh/authorized_keys'
+    # cat ~/.ssh/id_rsa.pub | docker exec -i ${name} sh -c 'cat >> /root/.ssh/authorized_keys'
 }
 
 function runTutorialContainer() {
@@ -109,6 +111,7 @@ function setupFiles() {
     for ((i = 0; i < $NOF_HOSTS; i++)); do
         #ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' host$i.example.org)
         ip=$(docker network inspect --format="{{range \$id, \$container := .Containers}}{{if eq \$container.Name \"host$i.example.org\"}}{{\$container.IPv4Address}} {{end}}{{end}}" ${NETWORK_NAME} | cut -d/ -f1)
+        # ip=$(docker network inspect --format="{{range \$id, \$container := .Containers}}{{if eq \$container.Name \"host$i.example.org\"}}{{\$container.IPv4Address}} {{end}}{{end}}" a600ca829442 | cut -d/ -f1)
         echo "host$i.example.org ansible_host=$ip ansible_user=root" >> "${step_01_hosts_file}"
     done
 }
