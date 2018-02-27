@@ -1,16 +1,15 @@
 #!/bin/bash
 BASEDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-NOF_HOSTS=4
+NOF_HOSTS=3
 NETWORK_NAME="ansible.tutorial"
-# WORKSPACE="${BASEDIR}/workspace"
-WORKSPACE="${BASEDIR}/ansible-clickhouse-dp"
+WORKSPACE="${BASEDIR}/ansible-sline-roles"
 TUTORIALS_FOLDER="${BASEDIR}/tutorials"
 
 HOSTPORT_BASE=${HOSTPORT_BASE:-42726}
 # Extra ports per host to expose. Should contain $NOF_HOSTS variables
 EXTRA_PORTS=( "8080" "30000" "443" )
-# Port Mapping
+# Port Mappin
 # +-----------+----------------+-------------------+
 # | Container | Container Port |     Host Port     |
 # +-----------+----------------+-------------------+
@@ -109,24 +108,14 @@ function setupFiles() {
     local step_01_hosts_file="${BASEDIR}/tutorials/files/step-1-2/hosts"
     rm -f "${step_01_hosts_file}"
     for ((i = 0; i < $NOF_HOSTS; i++)); do
-        #ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' host$i.example.org)
         ip=$(docker network inspect --format="{{range \$id, \$container := .Containers}}{{if eq \$container.Name \"host$i.example.org\"}}{{\$container.IPv4Address}} {{end}}{{end}}" ${NETWORK_NAME} | cut -d/ -f1)
-        # ip=$(docker network inspect --format="{{range \$id, \$container := .Containers}}{{if eq \$container.Name \"host$i.example.org\"}}{{\$container.IPv4Address}} {{end}}{{end}}" a600ca829442 | cut -d/ -f1)
-        # echo "host$i.example.org ansible_host=$ip ansible_user=root" >> "${step_01_hosts_file}" 
-        echo "host$i.example.org ansible_host=host$i.example.org ansible_user=root zookeeper_id=$(($i + 1))" >> "${step_01_hosts_file}" 
+        echo "host$i.example.org ansible_host=host$i.example.org ansible_user=root" >> "${step_01_hosts_file}" 
     done
 
     # generate custom hosts file
-    echo "[clickhouse]" > "${BASEDIR}/ansible-clickhouse-dp/ansible_hosts"
-    # cat "${step_01_hosts_file}" >> "${BASEDIR}/ansible-vertica/docker_hosts"
-    cat "${step_01_hosts_file}" | tee -a "${BASEDIR}/ansible-clickhouse-dp/ansible_hosts"
+    echo "[sline-test]" > "${WORKSPACE}/ansible_hosts"
+    cat "${step_01_hosts_file}" | tee -a "${WORKSPACE}/ansible_hosts"
     
-    # echo "" >> "${BASEDIR}/ansible-clickhouse-dp/ansible_hosts"
-
-    # echo "[zookeeper-nodes]" >> "${BASEDIR}/ansible-clickhouse-dp/ansible_hosts"
-    # for ((i = 0; i < $NOF_HOSTS; i++)); do
-        # echo "host$i.example.org zookeeper_id=$(($i + 1))" >> "${BASEDIR}/ansible-clickhouse-dp/ansible_hosts" 
-    # done
 }
 function init () {
     mkdir -p "${WORKSPACE}"

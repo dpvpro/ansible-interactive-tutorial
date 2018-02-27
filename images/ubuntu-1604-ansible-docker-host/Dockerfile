@@ -1,5 +1,5 @@
 FROM ubuntu:16.04
-MAINTAINER Hasan Turken
+MAINTAINER DP
 
 RUN apt-get update && apt-get install -y rsyslog iputils-ping netbase net-tools python openssh-server vim sudo curl python-yaml python-jinja2 python-paramiko python-crypto net-tools openjdk-8-jre netcat bash
 
