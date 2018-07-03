@@ -23,11 +23,11 @@ RUN chmod 644 /root/.ssh/id_rsa.pub && chmod 600 /root/.ssh/id_rsa
 
 
 ENV GOPATH /root/go/
-ENV GOROOT /usr/lib/go-1.9
+ENV GOROOT /usr/lib/go-1.10
 ENV PATH $PATH:$GOPATH:$GOROOT/bin
 
 
-RUN mkdir /root/go && apt-get install -y golang-1.9 && go get -u github.com/turkenh/nutsh && cd /root/go/src/github.com/turkenh/nutsh && go build && mv /root/go/src/github.com/turkenh/nutsh/nutsh /usr/bin
+RUN mkdir /root/go && apt-get install -y golang-1.10 && go get -u github.com/turkenh/nutsh && cd /root/go/src/github.com/turkenh/nutsh && go build && mv /root/go/src/github.com/turkenh/nutsh/nutsh /usr/bin
 
 WORKDIR /root/workspace
 

@@ -63,6 +63,9 @@ function runHostContainer() {
         echo "Could not start host container. Exiting!"
         exit 1
     fi
+    # inject own key
+    docker exec -i ${name} sh -c 'echo -e "\n" >> /root/.ssh/authorized_keys'
+    cat ~/.ssh/id_rsa.pub | docker exec -i ${name} sh -c 'cat >> /root/.ssh/authorized_keys'
 }
 
 function runTutorialContainer() {
@@ -92,10 +95,10 @@ function setupFiles() {
     local step_01_hosts_file="${BASEDIR}/tutorials/files/step-1-2/hosts"
     rm -f "${step_01_hosts_file}"
     for ((i = 0; i < $NOF_HOSTS; i++)); do
+        #ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' host$i.example.org)
         ip=$(docker network inspect --format="{{range \$id, \$container := .Containers}}{{if eq \$container.Name \"host$i.example.org\"}}{{\$container.IPv4Address}} {{end}}{{end}}" ${NETWORK_NAME} | cut -d/ -f1)
-        echo "host$i.example.org ansible_host=$ip ansible_user=root" >> "${step_01_hosts_file}" 
+        echo "host$i.example.org ansible_host=$ip ansible_user=root" >> "${step_01_hosts_file}"
     done
-
 }
 function init () {
     mkdir -p "${WORKSPACE}"

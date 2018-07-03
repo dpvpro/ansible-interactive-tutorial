@@ -3,8 +3,7 @@ BASEDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 NOF_HOSTS=4
 NETWORK_NAME="ansible.tutorial"
-# WORKSPACE="${BASEDIR}/workspace"
-WORKSPACE="${BASEDIR}/ansible-clickhouse-dp"
+WORKSPACE="${BASEDIR}/test_roles/ansible-clickhouse-dp"
 TUTORIALS_FOLDER="${BASEDIR}/tutorials"
 
 HOSTPORT_BASE=${HOSTPORT_BASE:-42726}
@@ -28,15 +27,11 @@ EXTRA_PORTS=( "8080" "30000" "443" )
 # +-----------+----------------+-------------------+
 
 DOCKER_IMAGETAG=${DOCKER_IMAGETAG:-1.0}
-# DOCKER_HOST_IMAGE="turkenh/ubuntu-1604-ansible-docker-host:${DOCKER_IMAGETAG}"
-# TUTORIAL_IMAGE="turkenh/ansible-tutorial:${DOCKER_IMAGETAG}"
 
 DOCKER_HOST_IMAGE="dp/ubuntu-1604-ansible-docker-host:${DOCKER_IMAGETAG}"
-TUTORIAL_IMAGE="dp/ubuntu-wks:${DOCKER_IMAGETAG}"
-
-# DOCKER_HOST_IMAGE="dp/ubuntu14.04:${DOCKER_IMAGETAG}"
-# TUTORIAL_IMAGE="turkenh/ansible-tutorial:${DOCKER_IMAGETAG}"
-
+# cd /home/dp/Code/ansible-interactive-tutorial/images/ansible-tutorial/
+# docker build . -t dp/ubuntu-main:1.0
+TUTORIAL_IMAGE="dp/ubuntu-main:${DOCKER_IMAGETAG}"
 
 
 function help() {
@@ -91,8 +86,8 @@ function runTutorialContainer() {
     # docker run -it -v "${WORKSPACE}":/root/workspace -v "${TUTORIALS_FOLDER}":/tutorials --net ${NETWORK_NAME} \
     #   --env HOSTPORT_BASE=$HOSTPORT_BASE \
     #   ${entrypoint} --name="ansible.tutorial" "${TUTORIAL_IMAGE}" ${args}
-    docker run -it -v "${WORKSPACE}":/root/workspace -v "${TUTORIALS_FOLDER}":/tutorials --net ${NETWORK_NAME} \
-      --env HOSTPORT_BASE=$HOSTPORT_BASE \
+    docker run -it -v "${WORKSPACE}":/root/workspace -v "${TUTORIALS_FOLDER}":/tutorials \
+      --net ${NETWORK_NAME} --env HOSTPORT_BASE=$HOSTPORT_BASE \
       --name="ansible.tutorial" "${TUTORIAL_IMAGE}"
     return $?
 }
@@ -117,14 +112,14 @@ function setupFiles() {
     done
 
     # generate custom hosts file
-    echo "[clickhouse]" > "${BASEDIR}/ansible-clickhouse-dp/ansible_hosts"
-    cat "${step_01_hosts_file}" | tee -a "${BASEDIR}/ansible-clickhouse-dp/ansible_hosts"
+    echo "[clickhouse]" > "${WORKSPACE}/ansible_hosts"
+    cat "${step_01_hosts_file}" | tee -a "${WORKSPACE}/ansible_hosts"
     
-    # echo "" >> "${BASEDIR}/ansible-clickhouse-dp/ansible_hosts"
+    # echo "" >> "${WORKSPACE}/ansible_hosts"
 
-    # echo "[zookeeper-nodes]" >> "${BASEDIR}/ansible-clickhouse-dp/ansible_hosts"
+    # echo "[zookeeper-nodes]" >> "${WORKSPACE}/ansible_hosts"
     # for ((i = 0; i < $NOF_HOSTS; i++)); do
-        # echo "host$i.example.org zookeeper_id=$(($i + 1))" >> "${BASEDIR}/ansible-clickhouse-dp/ansible_hosts" 
+        # echo "host$i.example.org zookeeper_id=$(($i + 1))" >> "${WORKSPACE}/ansible_hosts" 
     # done
 }
 function init () {
